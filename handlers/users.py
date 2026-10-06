@@ -1,9 +1,8 @@
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
-from handlers.states import BotStates
 from keyboards.main_menu_kb import get_main_menu_kb
 
 from lexicon.lexicon import LEXICON_RU

@@ -6,6 +6,13 @@ from environs import Env
 class TgBot:
     token: str
 
+
+@dataclass
+class AdminConfig:
+    ids: list[int]
+    contact: str
+
+
 @dataclass
 class LogSettings:
     level: str
@@ -14,6 +21,7 @@ class LogSettings:
 @dataclass
 class Config:
     bot: TgBot
+    admins: AdminConfig
     log: LogSettings
 
 
@@ -23,6 +31,10 @@ def load_config() -> Config:
 
     return Config(
         bot=TgBot(token=env.str("BOT_TOKEN")),
+        admins=AdminConfig(
+            ids=env.list("ADMIN_IDS", subcast=int),
+            contact=env.str("ADMIN_CONTACT"),
+        ),
         log=LogSettings(
             level=env.str("LOG_LEVEL", default="INFO"),
             format=env.str("LOG_FORMAT")

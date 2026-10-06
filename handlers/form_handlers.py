@@ -1,11 +1,11 @@
 import re
-from datetime import datetime, timedelta
+from datetime import date, datetime
 
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
-from aiogram.fsm.state import State
 from aiogram.fsm.context import FSMContext
 
+from database import get_active_order_by_telegram_id
 from handlers.states import BotStates
 
 from keyboards.main_menu_kb import get_main_menu_kb
@@ -19,6 +19,16 @@ async def process_buy_button(
     message: Message,
     state: FSMContext,
 ):
+    active_order = get_active_order_by_telegram_id(message.from_user.id)
+    if active_order is not None:
+        text_key = (
+            "payment.active_approved"
+            if active_order.status == "approved"
+            else "payment.active_pending"
+        )
+        await message.answer(text=LEXICON_RU[text_key])
+        return
+
     await message.answer(
         text=LEXICON_RU["form.name"]
     )
@@ -29,6 +39,10 @@ async def process_get_full_name(
     message: Message,
     state: FSMContext,
 ):
+    if message.text is None:
+        await message.answer(text=LEXICON_RU["form.text_error"])
+        return
+
     await state.update_data(full_name=message.text)
     await message.answer(text=LEXICON_RU["form.b_day"])
     await state.set_state(BotStates.waiting_for_date_birthday)
@@ -40,19 +54,28 @@ async def process_get_birthday_date(
 ):
     b_day_text = message.text
 
-    if not re.match(r"^\d{2}\.\d{2}\.\d{4}$", b_day_text):
+    if b_day_text is None or not re.fullmatch(
+        r"\d{2}\.\d{2}\.\d{4}",
+        b_day_text,
+    ):
         await message.answer(text=LEXICON_RU["form.b_day_error"])
         return
 
     try:
-        birthday = datetime.strptime(b_day_text, "%d.%m.%Y")
-        age = (datetime.now() - birthday).days // 365
+        birthday = datetime.strptime(b_day_text, "%d.%m.%Y").date()
+        today = date.today()
+        age = (
+            today.year
+            - birthday.year
+            - ((today.month, today.day) < (birthday.month, birthday.day))
+        )
         if age < 18:
             await message.answer(text=LEXICON_RU["form.b_day_less_than_18"])
             await message.answer(
                 text=LEXICON_RU["common.start"],
                 reply_markup=get_main_menu_kb(),
             )
+            await state.clear()
             return
 
     except ValueError:
@@ -68,6 +91,10 @@ async def process_get_group(
     message: Message,
     state: FSMContext,
 ):
+    if message.text is None:
+        await message.answer(text=LEXICON_RU["form.text_error"])
+        return
+
     await state.update_data(group=message.text)
 
     data = await state.get_data()

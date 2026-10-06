@@ -2,10 +2,9 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
 
 from config.config import load_config
+from database import init_db
 
 from handlers import routers
 
@@ -13,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 async def main() -> None:
     config = load_config()
+    init_db()
 
     logging.basicConfig(
         level=logging.getLevelName(level=config.log.level),

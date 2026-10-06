@@ -20,7 +20,7 @@ def get_user_confirmation_kb() -> InlineKeyboardMarkup:
     )
     builder_form.adjust(1)
 
-    return builder_form.as_markup(resize_keyboard=True)
+    return builder_form.as_markup()
 
 def get_user_buy_confirmation_kb() -> InlineKeyboardMarkup:
     builder_accept = InlineKeyboardBuilder()
@@ -28,10 +28,6 @@ def get_user_buy_confirmation_kb() -> InlineKeyboardMarkup:
     builder_accept.button(
         text=LEXICON_RU["user.buy_confirmation"],
         callback_data="payment:paid"
-    )
-    builder_accept.button(
-        text=LEXICON_RU["user.confirmation_cancel"],
-        callback_data="payment:cancel"
     )
 
     builder_accept.adjust(1)
