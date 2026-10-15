@@ -135,6 +135,29 @@ def get_active_order_by_telegram_id(telegram_id: int) -> Order | None:
     return _row_to_order(row)
 
 
+def list_orders_by_telegram_id(telegram_id: int) -> list[Order]:
+    with _connect() as connection:
+        rows = connection.execute(
+            """
+            SELECT *
+            FROM orders
+            WHERE telegram_id = ?
+            ORDER BY id
+            """,
+            (telegram_id,),
+        ).fetchall()
+    return [Order(**dict(row)) for row in rows]
+
+
+def delete_orders_by_telegram_id(telegram_id: int) -> int:
+    with _connect() as connection:
+        cursor = connection.execute(
+            "DELETE FROM orders WHERE telegram_id = ?",
+            (telegram_id,),
+        )
+    return cursor.rowcount
+
+
 def update_order_status(
     order_id: int,
     status: str,

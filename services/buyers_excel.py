@@ -1,4 +1,3 @@
-from datetime import datetime
 from io import BytesIO
 
 import xlsxwriter
@@ -33,11 +32,11 @@ def build_buyers_excel(orders: list[Order]) -> bytes:
             "border_color": "#D9E2F3",
         }
     )
-    date_format = workbook.add_format(
+    birthdate_format = workbook.add_format(
         {
             "font_name": "Arial",
             "font_size": 11,
-            "num_format": "dd.mm.yyyy",
+            "num_format": "@",
             "align": "center",
             "valign": "vcenter",
             "border": 1,
@@ -58,12 +57,11 @@ def build_buyers_excel(orders: list[Order]) -> bytes:
     worksheet.write_row(0, 0, headers, header_format)
 
     for row, order in enumerate(orders, start=1):
-        birthdate = datetime.strptime(order.birthdate, "%d.%m.%Y")
         username = f"@{order.telegram_username}" if order.telegram_username else ""
 
         worksheet.write(row, 0, order.full_name, text_format)
         worksheet.insert_checkbox(row, 1, False, checkbox_format)
-        worksheet.write_datetime(row, 2, birthdate, date_format)
+        worksheet.write_string(row, 2, order.birthdate, birthdate_format)
         worksheet.write(row, 3, order.group_name, text_format)
         worksheet.write(row, 4, username, text_format)
         worksheet.set_row(row, 24)
