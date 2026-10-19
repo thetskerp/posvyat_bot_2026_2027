@@ -59,7 +59,7 @@ async def process_payment_paid(
     username = (
         f"@{order.telegram_username}"
         if order.telegram_username
-        else "не указан"
+        else LEXICON_RU["admin.username_missing"]
     )
     admin_text = LEXICON_RU["admin.new_order"].format(
         order_id=order.id,

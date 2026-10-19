@@ -79,7 +79,7 @@ async def process_get_birthday_date(
             return
 
     except ValueError:
-        await message.answer(text="Ошибка: Введена некорректная дата.")
+        await message.answer(text=LEXICON_RU["form.b_day_invalid"])
         return
 
     await state.update_data(birthdate=b_day_text)
@@ -99,11 +99,10 @@ async def process_get_group(
 
     data = await state.get_data()
 
-    text = (
-        "Проверьте введённые данные:\n\n"
-        f"ФИО: {data['full_name']}\n"
-        f"Дата рождения: {data['birthdate']}\n"
-        f"Группа/вуз: {data['group']}"
+    text = LEXICON_RU["form.check_data"].format(
+        full_name=data["full_name"],
+        birthdate=data["birthdate"],
+        group=data["group"],
     )
 
     await state.set_state(BotStates.waiting_for_confirmation_from_user)
@@ -156,6 +155,6 @@ async def process_form_cancel(
     await state.clear()
 
     await callback.message.answer(
-        text="Покупка отменена",
+        text=LEXICON_RU["form.cancelled"],
         reply_markup=get_main_menu_kb(),
     )
