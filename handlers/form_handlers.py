@@ -1,8 +1,10 @@
 import re
+import logging
 from datetime import date, datetime
+from pathlib import Path
 
 from aiogram import F, Router
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, FSInputFile, Message
 from aiogram.fsm.context import FSMContext
 
 from database import get_active_order_by_telegram_id
@@ -13,6 +15,13 @@ from keyboards.user_confirmation_kb import get_user_confirmation_kb, get_user_bu
 
 from lexicon.lexicon import LEXICON_RU
 form_router = Router()
+logger = logging.getLogger(__name__)
+
+OFFER_FILE_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "documents"
+    / "offer_agreement.pdf"
+)
 
 @form_router.message(F.text == LEXICON_RU["menu.buy"])
 async def process_buy_button(
@@ -123,6 +132,15 @@ async def process_form_confirm(
     await callback.message.edit_reply_markup(reply_markup=None)
 
     await state.set_state(BotStates.waiting_for_payment)
+
+    if not OFFER_FILE_PATH.is_file():
+        logger.warning("Offer agreement file not found: %s", OFFER_FILE_PATH)
+    else:
+        await callback.message.answer_document(
+            document=FSInputFile(OFFER_FILE_PATH),
+            caption=LEXICON_RU["common.offer_caption"],
+        )
+
     await callback.message.answer(
         text=LEXICON_RU["payment.details"],
         reply_markup=get_user_buy_confirmation_kb(),

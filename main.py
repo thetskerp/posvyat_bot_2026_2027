@@ -8,6 +8,11 @@ from database import init_db
 
 from handlers import routers
 
+from aiogram import Bot
+from aiogram.client.session.aiohttp import AiohttpSession
+
+session = AiohttpSession(proxy="http://proxy.server:3128")
+
 logger = logging.getLogger(__name__)
 
 async def main() -> None:
@@ -21,7 +26,8 @@ async def main() -> None:
     logger.info("Starting bot")
 
     bot = Bot(
-        token=config.bot.token
+        token=config.bot.token,
+        session=session,
     )
 
     dp = Dispatcher()
